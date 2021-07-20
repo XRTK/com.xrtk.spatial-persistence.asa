@@ -65,8 +65,5 @@ extends:
     # TODO: Only use XRTK defined platform targets for build
     targets:
       - StandaloneWindows64
-      - WSAPlayer
-      - StandaloneOSX
-      - StandaloneLinux64
+      #- WSAPlayer
       - Android
-      - WebGL
