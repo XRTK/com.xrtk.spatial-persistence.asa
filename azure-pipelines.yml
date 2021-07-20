@@ -8,9 +8,9 @@ resources:
       endpoint: XRTK
 
 variables:
-  project.name: 'XRTK.ProjectName'
+  project.name: 'XRTK.Anchors.ASA'
   project.upmSha: ''
-  package.name: 'com.xrtk.projectname'
+  package.name: 'com.xrtk.anchors.asa'
   package.version: ''
   EditorPath: ''
   LogDirectory: ''
@@ -33,13 +33,13 @@ pr:
   paths:
     include:
     - azure-pipelines.yml
-    - XRTK.ProjectName/*
+    - XRTK.Anchors.ASA/*
     - Submodules/*
     exclude:
       - '*'
-      - XRTK.ProjectName/Packages/com.xrtk.projectname/package.json
-      - XRTK.ProjectName/Packages/com.xrtk.projectname/README.md
-      - XRTK.ProjectName/Packages/com.xrtk.projectname/LICENSE.md
+      - XRTK.Anchors.ASA/Packages/com.xrtk.anchors.asa/package.json
+      - XRTK.Anchors.ASA/Packages/com.xrtk.anchors.asa/README.md
+      - XRTK.Anchors.ASA/Packages/com.xrtk.anchors.asa/LICENSE.md
 
 trigger:
   batch: true
@@ -49,13 +49,13 @@ trigger:
   paths:
     include:
       - azure-pipelines.yml
-      - XRTK.ProjectName/*
+      - XRTK.Anchors.ASA/*
       - Submodules/*
     exclude:
       - '*'
-      - XRTK.ProjectName/Packages/com.xrtk.projectname/package.json
-      - XRTK.ProjectName/Packages/com.xrtk.projectname/README.md
-      - XRTK.ProjectName/Packages/com.xrtk.projectname/LICENSE.md
+      - XRTK.Anchors.ASA/Packages/com.xrtk.anchors.asa/package.json
+      - XRTK.Anchors.ASA/Packages/com.xrtk.anchors.asa/README.md
+      - XRTK.Anchors.ASA/Packages/com.xrtk.anchors.asa/LICENSE.md
 
 extends:
   template: common.yml@pipeline_repo

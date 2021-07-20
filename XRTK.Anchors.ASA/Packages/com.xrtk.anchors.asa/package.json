@@ -1,7 +1,7 @@
 {
-  "name": "com.xrtk.projectname",
-  "displayName": "XRTK.ProjectName",
-  "description": "The ProjectName components for the Mixed Reality Toolkit.",
+  "name": "com.xrtk.anchors.asa",
+  "displayName": "XRTK.Anchors.ASA",
+  "description": "The Anchors.ASA components for the Mixed Reality Toolkit.",
   "keywords": [
     "xrtk",
     "vr",
@@ -15,7 +15,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/XRTK/ProjectName.git"
+    "url": "git+https://github.com/XRTK/Anchors.ASA.git"
   },
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {

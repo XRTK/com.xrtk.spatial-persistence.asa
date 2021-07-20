@@ -4,15 +4,15 @@
 using UnityEngine;
 using XRTK.Editor.Utilities;
 
-namespace XRTK.ProjectName.Editor
+namespace XRTK.Anchors.ASA.Editor
 {
     /// <summary>
-    /// Dummy scriptable object used to find the relative path of the com.xrtk.projectname.
+    /// Dummy scriptable object used to find the relative path of the com.xrtk.anchors.asa.
     /// </summary>
     ///// <inheritdoc cref="IPathFinder" />
-    public class ProjectNamePathFinder : ScriptableObject, IPathFinder
+    public class Anchors.ASAPathFinder : ScriptableObject, IPathFinder
     {
         ///// <inheritdoc />
-        public string Location => $"/Editor/{nameof(ProjectNamePathFinder)}.cs";
+        public string Location => $"/Editor/{nameof(Anchors.ASAPathFinder)}.cs";
     }
 }
