@@ -11,7 +11,7 @@
     "reality"
   ],
   "version": "0.3.0",
-  "unity": "2019.4",
+  "unity": "2020.3",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -19,7 +19,8 @@
   },
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
-    "com.xrtk.core": "0.3.0-preview.7"
+    "com.xrtk.core": "0.3.0-preview.7",
+    "com.xrtk.anchors": "0.3.0"
   },
   "profiles": [
     {
