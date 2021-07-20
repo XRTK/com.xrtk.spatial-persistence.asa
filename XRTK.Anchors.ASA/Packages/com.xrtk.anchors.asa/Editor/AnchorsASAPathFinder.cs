@@ -10,9 +10,9 @@ namespace XRTK.Anchors.ASA.Editor
     /// Dummy scriptable object used to find the relative path of the com.xrtk.anchors.asa.
     /// </summary>
     ///// <inheritdoc cref="IPathFinder" />
-    public class Anchors.ASAPathFinder : ScriptableObject, IPathFinder
+    public class AnchorsASAPathFinder : ScriptableObject, IPathFinder
     {
         ///// <inheritdoc />
-        public string Location => $"/Editor/{nameof(Anchors.ASAPathFinder)}.cs";
+        public string Location => $"/Editor/{nameof(AnchorsASAPathFinder)}.cs";
     }
 }
