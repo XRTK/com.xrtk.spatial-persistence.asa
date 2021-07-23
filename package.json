@@ -1,0 +1,31 @@
+{
+  "name": "com.xrtk.spatial-persistence.asa",
+  "displayName": "XRTK.SpatialPersistence.ASA",
+  "description": "The Azure Spatial Anchor components for the Mixed Reality Toolkit.",
+  "keywords": [
+    "xrtk",
+    "vr",
+    "ar",
+    "xr",
+    "mixed",
+    "reality"
+  ],
+  "version": "0.3.0",
+  "unity": "2020.3",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XRTK/SpatialPersistence.ASA.git"
+  },
+  "author": "XRTK Team (https://github.com/XRTK)",
+  "dependencies": {
+    "com.xrtk.core": "0.3.0-preview.7",
+    "com.xrtk.spatial-persistence": "0.3.0"
+  },
+  "profiles": [
+    {
+      "displayName": "Default Profiles",
+      "path": "Profiles~/"
+    }
+  ]
+}
