@@ -9,7 +9,7 @@
     }
   ],
   "dependencies": {
-    "com.xrtk.anchors": "file:../../XRTK.Anchors/XRTK.Anchors/Packages/com.xrtk.anchors",
+    "com.xrtk.spatial-persistence": "file:../../XRTK.SpatialPersistence/XRTK.SpatialPersistence/Packages/com.xrtk.spatial-persistence",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.2d.tilemap": "1.0.0",
     "com.unity.ide.rider": "2.0.7",
