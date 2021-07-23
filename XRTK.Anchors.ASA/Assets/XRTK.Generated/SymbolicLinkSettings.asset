@@ -12,7 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff8a5d57a9af497db320551240c892c2, type: 3}
   m_Name: SymbolicLinkSettings
   m_EditorClassIdentifier: 
-  symbolicLinks:
-  - sourceRelativePath: /XRTK.Anchors.ASA/Packages/com.xrtk.anchors.asa/Profiles~
-    targetRelativePath: /XRTK.Anchors.ASA/Assets/XRTK.Generated/Anchors.ASA/Profiles
-    isActive: 1
+  symbolicLinks: []
