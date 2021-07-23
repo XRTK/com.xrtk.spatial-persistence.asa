@@ -1,6 +1,6 @@
 {
-    "name": "XRTK.Anchors.ASA",
-    "rootNamespace": "XRTK.Anchors.ASA",
+    "name": "XRTK.SpatialPersistence.ASA",
+    "rootNamespace": "XRTK.SpatialPersistence.ASA",
     "references": [
         "GUID:f3241d040533491e8a1e2714b27c3111"
     ],
