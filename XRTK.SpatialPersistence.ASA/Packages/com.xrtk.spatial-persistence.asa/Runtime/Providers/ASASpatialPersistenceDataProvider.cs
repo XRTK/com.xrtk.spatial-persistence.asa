@@ -10,19 +10,18 @@ using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using XRTK.Definitions.SpatialPersistence;
 using XRTK.Definitions.Utilities;
-using XRTK.Interfaces;
 using XRTK.Interfaces.SpatialPersistence;
 using XRTK.Services;
 
 namespace XRTK.Providers.SpatialPersistence
 {
-    [System.Runtime.InteropServices.Guid("bc7fc778-4ffd-4d36-a840-d2e86de303a8")]
+    [System.Runtime.InteropServices.Guid("02963BCE-8519-4923-AE59-833953F6F13C")]
     public class ASASpatialPersistenceDataProvider : BaseExtensionDataProvider, IMixedRealitySpatialPersistenceDataProvider
     {
+        private readonly IMixedRealitySpatialPersistenceSystem spatialPersistenceSystem = null; 
         private SpatialAnchorManager cloudManager;
         private AnchorLocateCriteria anchorLocateCriteria;
         private CloudSpatialAnchorWatcher currentWatcher;
-        private GameObject spatialManagerGameObject;
 
         private Dictionary<string, CloudSpatialAnchor> detectedAnchors = new Dictionary<string, CloudSpatialAnchor>();
 
@@ -32,9 +31,11 @@ namespace XRTK.Providers.SpatialPersistence
         /// <inheritdoc />
         public bool IsRunning => cloudManager != null && cloudManager.IsSessionStarted;
 
-        public ASASpatialPersistenceDataProvider(string name, uint priority, SpatialPersistenceDataProviderProfile profile, IMixedRealityExtensionService parentService)
+        public ASASpatialPersistenceDataProvider(string name, uint priority, SpatialPersistenceDataProviderProfile profile, IMixedRealitySpatialPersistenceSystem parentService)
             : base(name, priority, profile, parentService)
-        { }
+        {
+            spatialPersistenceSystem = parentService;
+        }
 
         #region BaseExtensionService Implementation
 
@@ -47,7 +48,7 @@ namespace XRTK.Providers.SpatialPersistence
             cloudManager = GameObject.FindObjectOfType<SpatialAnchorManager>();
             if (cloudManager == null)
             {
-                cloudManager = GameObject.FindObjectOfType<ARSession>().gameObject.AddComponent<SpatialAnchorManager>();
+                cloudManager = GameObject.FindObjectOfType<ARSessionOrigin>().gameObject.AddComponent<SpatialAnchorManager>();
             }
             if (cloudManager == null)
             {
@@ -60,6 +61,8 @@ namespace XRTK.Providers.SpatialPersistence
             cloudManager.AnchorLocated += CloudManager_AnchorLocated;
 
             anchorLocateCriteria = new AnchorLocateCriteria();
+
+            spatialPersistenceSystem.RegisterSpatialPersistenceDataProvider(this);
 
             OnSessionInitialised();
         }
@@ -79,6 +82,8 @@ namespace XRTK.Providers.SpatialPersistence
             }
 
             base.Destroy();
+
+            spatialPersistenceSystem.RegisterSpatialPersistenceDataProvider(this);
         }
 
         #endregion
@@ -95,7 +100,14 @@ namespace XRTK.Providers.SpatialPersistence
             }
             await cloudManager.StartSessionAsync();
 
-            OnSessionStarted();
+            if (cloudManager.IsSessionStarted)
+            {
+                OnSessionStarted();
+            }
+            else
+            {
+                OnSpatialPersistenceError("Unable to start the Spatial Persistence provider, is it configuired correctly?");
+            }
         }
 
         /// <inheritdoc />
@@ -135,6 +147,12 @@ namespace XRTK.Providers.SpatialPersistence
         public async void CreateAnchoredObject(GameObject objectToAnchorPrefab, Vector3 position, Quaternion rotation, DateTimeOffset timeToLive)
         {
             Debug.Assert(objectToAnchorPrefab != null, "Anchored Object Prefab is null");
+
+            if (cloudManager == null || !cloudManager.IsSessionStarted)
+            {
+                OnSpatialPersistenceError("Unable to create Anchor as the Spatial Persistence provider is not running, is it configuired correctly?");
+                return;
+            }
 
             OnCreateAnchoredObjectStarted();
 
@@ -236,7 +254,7 @@ namespace XRTK.Providers.SpatialPersistence
 
                 //Android and iOS require coordinate from stored Anchor
 #if UNITY_ANDROID || UNITY_IOS
-            detectedAnchorPose = detectedAnchors[id].GetPose();
+                detectedAnchorPose = detectedAnchors[id].GetPose();
 #endif
 
                 var anchoredObject = GameObject.Instantiate(objectToAnchorPrefab, detectedAnchorPose.position, detectedAnchorPose.rotation);
@@ -270,6 +288,13 @@ namespace XRTK.Providers.SpatialPersistence
             {
                 Debug.Assert(attachedAnchor != null, "No existing ASA Anchor to move");
 
+                return false;
+            }
+
+            //If the ASA Provider is not running, expose an error.
+            if (!string.IsNullOrEmpty(cloudAnchorID) && (cloudManager == null || !cloudManager.IsSessionStarted))
+            {
+                OnSpatialPersistenceError("Unable to create Anchor as the Spatial Persistence provider is not running, is it configuired correctly?");
                 return false;
             }
 

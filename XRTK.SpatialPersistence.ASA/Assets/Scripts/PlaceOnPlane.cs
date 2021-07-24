@@ -44,7 +44,7 @@ namespace UnityEngine.XR.ARFoundation.Samples
         /// </summary>
         public GameObject spawnedObject { get; private set; }
 
-        void Awake()
+        void Start()
         {
             m_RaycastManager = GetComponent<ARRaycastManager>();
             if (MixedRealityToolkit.TryGetService<IMixedRealitySpatialPersistenceSystem>(out anchorService))
@@ -54,7 +54,13 @@ namespace UnityEngine.XR.ARFoundation.Samples
                 anchorService.SpatialPersistenceStatusMessage += SpatialPersistenceSystem_SpatialPersistenceStatusMessage;
                 anchorService.CloudAnchorLocated += SpatialPersistenceSystem_CloudAnchorLocated;
                 anchorService.CloudAnchorUpdated += SpatialPersistenceSystem_CloudAnchorUpdated;
+                anchorService.SpatialPersistenceError += AnchorService_SpatialPersistenceError;
             }
+        }
+
+        private void AnchorService_SpatialPersistenceError(string message)
+        {
+            UpdateStatusText(message, Color.red);
         }
 
         private void SpatialPersistenceSystem_CloudAnchorUpdated(string anchorID, GameObject gameObject)
@@ -72,21 +78,19 @@ namespace UnityEngine.XR.ARFoundation.Samples
 
         private void SpatialPersistenceSystem_SpatialPersistenceStatusMessage(string statusMessage)
         {
-            textStatus.text = statusMessage;
+            UpdateStatusText(statusMessage, Color.black);
         }
 
         private void SpatialPersistenceSystem_CreateAnchoredObjectFailed()
         {
             Debug.LogError("Anchor Failed to Create");
-            textStatus.color = Color.red;
-            textStatus.text = "Anchor Failed to Create";
+            UpdateStatusText($"Anchor Failed to Create", Color.red);
         }
 
         private void SpatialPersistenceSystem_CreateAnchoredObjectSucceeded(string anchorID, GameObject anchoredObject)
         {
             anchors.Add(anchorID, anchoredObject);
-            textStatus.color = Color.green;
-            textStatus.text = $"Anchor ID [{anchorID}] Saved";
+            UpdateStatusText($"Anchor ID [{anchorID}] Saved", Color.green);
         }
 
         bool TryGetTouchPosition(out Vector2 touchPosition)
@@ -117,9 +121,8 @@ namespace UnityEngine.XR.ARFoundation.Samples
 
                 if (spawnedObject == null)
                 {
-                    textStatus.text = string.Empty;
-                    textStatus.color = Color.black;
-                    anchorService.CreateAnchoredObject(m_PlacedPrefab, hitPose.position, hitPose.rotation, DateTimeOffset.Now.AddDays(1));
+                    UpdateStatusText(string.Empty, Color.black);
+                    anchorService?.CreateAnchoredObject(m_PlacedPrefab, hitPose.position, hitPose.rotation, DateTimeOffset.Now.AddDays(1));
                     //spawnedObject = Instantiate(m_PlacedPrefab, hitPose.position, hitPose.rotation);
                 }
                 else
@@ -158,6 +161,12 @@ namespace UnityEngine.XR.ARFoundation.Samples
                 }
             }
             return true;
+        }
+
+        private void UpdateStatusText(string message, Color color)
+        {
+            textStatus.color = color;
+            textStatus.text = message;
         }
     }
 }
