@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   configurations:
   - instancedType:
-      reference: bc7fc778-4ffd-4d36-a840-d2e86de303a8
+      reference: 02963bce-8519-4923-ae59-833953f6f13c
     name: AS A Spatial Persistence Data Provider
     priority: 0
     platformEntries:
