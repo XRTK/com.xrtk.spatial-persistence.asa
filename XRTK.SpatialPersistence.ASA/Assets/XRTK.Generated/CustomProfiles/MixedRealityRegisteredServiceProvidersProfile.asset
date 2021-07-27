@@ -12,12 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48c48e65a9914a9ab61b891d9b405064, type: 3}
   m_Name: MixedRealityRegisteredServiceProvidersProfile
   m_EditorClassIdentifier: 
-  configurations:
-  - instancedType:
-      reference: c055102f-5204-42ed-a4d8-f80d129b6bbd
-    name: Spatial Persistence System
-    priority: 0
-    platformEntries:
-      runtimePlatforms:
-      - reference: dac9ead8-54f9-4935-a27f-9f82f465c972
-    profile: {fileID: 11400000, guid: 8f8ae6e78a6848147bee583af5b60549, type: 2}
+  configurations: []
