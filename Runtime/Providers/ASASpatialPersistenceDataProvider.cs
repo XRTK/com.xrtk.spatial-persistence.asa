@@ -16,7 +16,7 @@ using XRTK.Services;
 namespace XRTK.Providers.SpatialPersistence
 {
     [System.Runtime.InteropServices.Guid("02963BCE-8519-4923-AE59-833953F6F13C")]
-    public class ASASpatialPersistenceDataProvider : BaseExtensionDataProvider, IMixedRealitySpatialPersistenceDataProvider
+    public class ASASpatialPersistenceDataProvider : BaseDataProvider, IMixedRealitySpatialPersistenceDataProvider
     {
         private readonly IMixedRealitySpatialPersistenceSystem spatialPersistenceSystem = null; 
         private SpatialAnchorManager cloudManager;
