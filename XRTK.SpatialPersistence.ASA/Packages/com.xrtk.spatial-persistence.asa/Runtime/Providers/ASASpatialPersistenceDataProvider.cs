@@ -134,6 +134,7 @@ namespace XRTK.Providers.SpatialPersistence
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private void CloudManager_AnchorLocated(object sender, AnchorLocatedEventArgs args)
+        private void CloudManager_AnchorLocated(object sender, AnchorLocatedEventArgs args)
         {
             if (Guid.TryParse(args.Identifier, out var anchorGuid))
             {
@@ -142,8 +143,22 @@ namespace XRTK.Providers.SpatialPersistence
                     detectedAnchors.Add(anchorGuid, args.Anchor);
                 }
 
-                //TODO
-                OnAnchorLocated(anchorGuid, new GameObject());
+                Pose detectedAnchorPose = Pose.identity;
+
+                //Android and iOS require coordinate from stored Anchor
+#if UNITY_ANDROID || UNITY_IOS
+                detectedAnchorPose = detectedAnchors[id].GetPose();
+#endif
+
+                var anchoredObject = new GameObject($"Anchor - [{anchorGuid}]");
+                anchoredObject.transform.SetPositionAndRotation(detectedAnchorPose.position, detectedAnchorPose.rotation);
+
+                CloudNativeAnchor attachedAnchor = GetClouddNativeAnchor(anchoredObject);
+
+                attachedAnchor.CloudToNative(detectedAnchors[anchorGuid]);
+                OnCloudAnchorUpdated(anchorGuid, anchoredObject);
+
+                OnCloudAnchorLocated(anchorGuid);
             }
             else
             {
@@ -243,33 +258,6 @@ namespace XRTK.Providers.SpatialPersistence
         {
             throw new NotImplementedException();
         }
-
-//        /// <inheritdoc />
-//        public bool PlaceAnchoredObject(string id, GameObject objectToAnchorPrefab)
-//        {
-//            Debug.Assert(!string.IsNullOrEmpty(id), "Anchor ID is null");
-//            Debug.Assert(objectToAnchorPrefab != null, "Object To Anchor Prefab is null");
-
-//            if (detectedAnchors.ContainsKey(id))
-//            {
-//                Pose detectedAnchorPose = Pose.identity;
-
-//                //Android and iOS require coordinate from stored Anchor
-//#if UNITY_ANDROID || UNITY_IOS
-//                detectedAnchorPose = detectedAnchors[id].GetPose();
-//#endif
-
-//                var anchoredObject = GameObject.Instantiate(objectToAnchorPrefab, detectedAnchorPose.position, detectedAnchorPose.rotation);
-
-//                CloudNativeAnchor attachedAnchor = GetClouddNativeAnchor(anchoredObject);
-
-//                attachedAnchor.CloudToNative(detectedAnchors[id]);
-//                OnCloudAnchorUpdated($"{anchoredObject.name}-{id}", anchoredObject);
-//                return true;
-//            }
-
-//            return false;
-//        }
 
         /// <inheritdoc />
         public bool HasCloudAnchor(GameObject anchoredObject)
