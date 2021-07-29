@@ -19,5 +19,5 @@ MonoBehaviour:
     priority: 0
     platformEntries:
       runtimePlatforms:
-      - reference: dac9ead8-54f9-4935-a27f-9f82f465c972
-    profile: {fileID: 11400000, guid: 2d600815899d76e46833e02a2ef6b761, type: 2}
+      - reference: c6bf6315-2e9c-4602-827d-2d4871d29422
+    profile: {fileID: 11400000, guid: 9cf0d78f769a2a648a8abedcab3521be, type: 2}

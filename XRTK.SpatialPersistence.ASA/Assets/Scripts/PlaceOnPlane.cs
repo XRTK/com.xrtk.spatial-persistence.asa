@@ -28,7 +28,7 @@ namespace UnityEngine.XR.ARFoundation.Samples
 
         private IMixedRealitySpatialPersistenceSystem anchorService;
 
-        private Dictionary<string, GameObject> anchors = new Dictionary<string, GameObject>();
+        private Dictionary<Guid, GameObject> anchors = new Dictionary<Guid, GameObject>();
 
         /// <summary>
         /// The prefab to instantiate on touch.
@@ -49,47 +49,59 @@ namespace UnityEngine.XR.ARFoundation.Samples
             m_RaycastManager = GetComponent<ARRaycastManager>();
             if (MixedRealityToolkit.TryGetService<IMixedRealitySpatialPersistenceSystem>(out anchorService))
             {
-                anchorService.CreateAnchoredObjectSucceeded += SpatialPersistenceSystem_CreateAnchoredObjectSucceeded;
-                anchorService.CreateAnchoredObjectFailed += SpatialPersistenceSystem_CreateAnchoredObjectFailed;
+                anchorService.CreateAnchorSucceeded += SpatialPersistenceSystem_CreateAnchorSucceeded;
+                anchorService.CreateAnchorFailed += SpatialPersistenceSystem_CreateAnchorFailed;
                 anchorService.SpatialPersistenceStatusMessage += SpatialPersistenceSystem_SpatialPersistenceStatusMessage;
-                anchorService.CloudAnchorLocated += SpatialPersistenceSystem_CloudAnchorLocated;
-                anchorService.CloudAnchorUpdated += SpatialPersistenceSystem_CloudAnchorUpdated;
+                anchorService.AnchorLocated += SpatialPersistenceSystem_AnchorLocated;
+                anchorService.AnchorUpdated += SpatialPersistenceSystem_AnchorUpdated;
                 anchorService.SpatialPersistenceError += AnchorService_SpatialPersistenceError;
             }
         }
 
         private void AnchorService_SpatialPersistenceError(string message)
         {
+            // Bad things happened, but what?
             UpdateStatusText(message, Color.red);
         }
 
-        private void SpatialPersistenceSystem_CloudAnchorUpdated(string anchorID, GameObject gameObject)
+        private void SpatialPersistenceSystem_AnchorUpdated(Guid anchorID, GameObject gameObject)
         {
             Debug.Log($"Anchor found [{anchorID}] and placed at [{gameObject.transform.position.ToString()}]-[{gameObject.transform.rotation.ToString()}]");
         }
 
-        private void SpatialPersistenceSystem_CloudAnchorLocated(string anchorID)
+        private void SpatialPersistenceSystem_AnchorLocated(Guid anchorID, GameObject gameObject)
         {
-            if (anchors.ContainsKey(anchorID))
-            {
-                anchorService.PlaceSpatialPersistence(anchorID, m_PlacedPrefab);
-            }
+            //Attach a 3D Object to the Empty Anchor Object
+            var locatedAnchor = GameObject.Instantiate(placedPrefab, gameObject.transform);
+            locatedAnchor.GetComponent<MeshRenderer>().material.color = Color.blue;
         }
 
         private void SpatialPersistenceSystem_SpatialPersistenceStatusMessage(string statusMessage)
         {
+            // If more data is required during the anchoring process, the Spatial Persistence system needs to feedback to the user.
             UpdateStatusText(statusMessage, Color.black);
         }
 
-        private void SpatialPersistenceSystem_CreateAnchoredObjectFailed()
+        private void SpatialPersistenceSystem_CreateAnchorFailed()
         {
             Debug.LogError("Anchor Failed to Create");
             UpdateStatusText($"Anchor Failed to Create", Color.red);
         }
 
-        private void SpatialPersistenceSystem_CreateAnchoredObjectSucceeded(string anchorID, GameObject anchoredObject)
+        private void SpatialPersistenceSystem_CreateAnchorSucceeded(Guid anchorID, GameObject anchoredObject)
         {
+            // Reset initial touched object
+            GameObject.Destroy(spawnedObject);
+            spawnedObject = null;
+
+            // Cache Placed object for future use
             anchors.Add(anchorID, anchoredObject);
+
+            // Place an Object on the new Anchor
+            var placedAnchor = GameObject.Instantiate(placedPrefab, gameObject.transform);
+            placedAnchor.GetComponent<MeshRenderer>().material.color = Color.magenta;
+
+            // Update UI that placement was successful
             UpdateStatusText($"Anchor ID [{anchorID}] Saved", Color.green);
         }
 
@@ -107,12 +119,19 @@ namespace UnityEngine.XR.ARFoundation.Samples
 
         void Update()
         {
+            // Is there a touch, if not, return
             if (!TryGetTouchPosition(out Vector2 touchPosition))
+            {
                 return;
+            }
 
+            // Is the touch NOT on a configured UI area. If it hits UI no touch areas, return
             if (!ValidARTouchLocation(touchPosition))
+            {
                 return;
+            }
 
+            // Use the ARRaycast Manager to ray cast into the scene to hit a ARPlane
             if (m_RaycastManager.Raycast(touchPosition, s_Hits, TrackableType.PlaneWithinPolygon))
             {
                 // Raycast hits are sorted by distance, so the first one
@@ -121,12 +140,18 @@ namespace UnityEngine.XR.ARFoundation.Samples
 
                 if (spawnedObject == null)
                 {
+                    // If this is a new placement, place a temp object where it was touched
                     UpdateStatusText(string.Empty, Color.black);
-                    anchorService?.CreateAnchoredObject(m_PlacedPrefab, hitPose.position, hitPose.rotation, DateTimeOffset.Now.AddDays(1));
-                    //spawnedObject = Instantiate(m_PlacedPrefab, hitPose.position, hitPose.rotation);
+                    spawnedObject = Instantiate(m_PlacedPrefab, hitPose.position, hitPose.rotation);
+                    spawnedObject.GetComponent<MeshRenderer>().material.color = Color.red;
+
+                    // Pass the touched position to the Spatial Persistence service to create an Anchor
+                    anchorService?.TryCreateAnchor(hitPose.position, hitPose.rotation, DateTimeOffset.Now.AddDays(1));
                 }
                 else
                 {
+                    // Dumb code to move a touched area, above code should be separated to a "Create Anchor" method.
+                    // Once the Anchor creation process has started, moving the object has no effect on the process.
                     spawnedObject.transform.position = hitPose.position;
                 }
             }
@@ -138,16 +163,16 @@ namespace UnityEngine.XR.ARFoundation.Samples
 
         public void ClearAndFindAnchors()
         {
-            List<string> anchorIDs = new List<string>();
-            foreach (KeyValuePair<string,GameObject> item in anchors)
+            List<Guid> anchorIDs = new List<Guid>();
+            foreach (KeyValuePair<Guid,GameObject> item in anchors)
             {
                 GameObject.Destroy(item.Value);
                 anchorIDs.Add(item.Key);
             }
 
-            anchorService.TryClearAnchors();
+            anchorService.TryClearAnchorCache();
 
-            anchorService.FindAnchorPoints(anchorIDs.ToArray());
+            anchorService.TryFindAnchorPoints(anchorIDs.ToArray());
         }
 
         public bool ValidARTouchLocation(Vector2 touchPosition)

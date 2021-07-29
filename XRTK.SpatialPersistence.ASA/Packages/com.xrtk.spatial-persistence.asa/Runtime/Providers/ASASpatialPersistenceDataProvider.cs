@@ -23,7 +23,7 @@ namespace XRTK.Providers.SpatialPersistence
         private AnchorLocateCriteria anchorLocateCriteria;
         private CloudSpatialAnchorWatcher currentWatcher;
 
-        private Dictionary<string, CloudSpatialAnchor> detectedAnchors = new Dictionary<string, CloudSpatialAnchor>();
+        private Dictionary<Guid, CloudSpatialAnchor> detectedAnchors = new Dictionary<Guid, CloudSpatialAnchor>();
 
         /// <inheritdoc />
         public SystemType SpatialPersistenceType => typeof(ASASpatialPersistenceDataProvider);
@@ -129,25 +129,31 @@ namespace XRTK.Providers.SpatialPersistence
         }
 
         /// <summary>
-        /// Anchor located by the ASA Cloud watcher service, returns the ID reported by the service for the anchor via <see cref="OnCloudAnchorLocated"/> event
+        /// Anchor located by the ASA Cloud watcher service, returns the ID reported by the service for the anchor via <see cref="OnAnchorLocated"/> event
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private void CloudManager_AnchorLocated(object sender, AnchorLocatedEventArgs args)
         {
-            if (!detectedAnchors.ContainsKey(args.Identifier))
+            if (Guid.TryParse(args.Identifier, out var anchorGuid))
             {
-                detectedAnchors.Add(args.Identifier, args.Anchor);
-            }
+                if (!detectedAnchors.ContainsKey(anchorGuid))
+                {
+                    detectedAnchors.Add(anchorGuid, args.Anchor);
+                }
 
-            OnCloudAnchorLocated(args.Identifier);
+                //TODO
+                OnAnchorLocated(anchorGuid, new GameObject());
+            }
+            else
+            {
+                OnSpatialPersistenceError($"Anchor returned from service but Identifier was invalid [{args.Identifier}]");
+            }
         }
 
         /// <inheritdoc />
-        public async void CreateAnchoredObject(GameObject objectToAnchorPrefab, Vector3 position, Quaternion rotation, DateTimeOffset timeToLive)
+        public async void TryCreateAnchor(Vector3 position, Quaternion rotation, DateTimeOffset timeToLive)
         {
-            Debug.Assert(objectToAnchorPrefab != null, "Anchored Object Prefab is null");
-
             if (cloudManager == null || !cloudManager.IsSessionStarted)
             {
                 OnSpatialPersistenceError("Unable to create Anchor as the Spatial Persistence provider is not running, is it configuired correctly?");
@@ -156,7 +162,8 @@ namespace XRTK.Providers.SpatialPersistence
 
             OnCreateAnchoredObjectStarted();
 
-            var anchoredObject = GameObject.Instantiate(objectToAnchorPrefab, position, rotation);
+            var anchoredObject = new GameObject("Anchor");
+            anchoredObject.transform.SetPositionAndRotation(position, rotation);
 
             CloudNativeAnchor cloudNativeAnchor = GetClouddNativeAnchor(anchoredObject);
 
@@ -188,10 +195,11 @@ namespace XRTK.Providers.SpatialPersistence
 
                 // Success?
                 //bool success = ;
-                if (cloudAnchor != null)
+                if (cloudAnchor != null && Guid.TryParse(cloudAnchor.Identifier, out var cloudAnchorGuid))
                 {
-                    detectedAnchors.Add(cloudAnchor.Identifier, cloudAnchor);
-                    OnCreateAnchoredObjectSucceeded(cloudAnchor.Identifier, anchoredObject);
+                    detectedAnchors.Add(cloudAnchorGuid, cloudAnchor);
+                    OnCreateAnchorSucceeded(cloudAnchorGuid, anchoredObject);
+                    anchoredObject.name = $"Anchor - [{cloudAnchor.Identifier}]";
                 }
                 else
                 {
@@ -206,22 +214,16 @@ namespace XRTK.Providers.SpatialPersistence
         }
 
         /// <inheritdoc />
-        public bool FindAnchorPoint(string id)
-        {
-            return FindAnchorPoints(new string[] { id });
-        }
-
-        /// <inheritdoc />
-        public bool FindAnchorPoints(string[] ids)
+        public bool TryFindAnchorPoints(params Guid[] ids)
         {
             Debug.Assert(ids != null, "ID array is null");
             Debug.Assert(ids.Length < 1, "No Ids found to locate");
 
             if (ids != null)
             {
-                OnAnchorLocated();
+                OnFindAnchorStarted();
 
-                anchorLocateCriteria.Identifiers = ids;
+                anchorLocateCriteria.Identifiers = ids.ToStringArray();
                 if ((cloudManager != null) && (cloudManager.Session != null))
                 {
                     currentWatcher = cloudManager.Session.CreateWatcher(anchorLocateCriteria);
@@ -237,37 +239,37 @@ namespace XRTK.Providers.SpatialPersistence
         }
 
         /// <inheritdoc />
-        public virtual bool FindAnchorPoints(SpatialPersistenceSearchType searchType)
+        public bool TryFindAnchorPoints(SpatialPersistenceSearchType searchType)
         {
             throw new NotImplementedException();
         }
 
-        /// <inheritdoc />
-        public bool PlaceAnchoredObject(string id, GameObject objectToAnchorPrefab)
-        {
-            Debug.Assert(!string.IsNullOrEmpty(id), "Anchor ID is null");
-            Debug.Assert(objectToAnchorPrefab != null, "Object To Anchor Prefab is null");
+//        /// <inheritdoc />
+//        public bool PlaceAnchoredObject(string id, GameObject objectToAnchorPrefab)
+//        {
+//            Debug.Assert(!string.IsNullOrEmpty(id), "Anchor ID is null");
+//            Debug.Assert(objectToAnchorPrefab != null, "Object To Anchor Prefab is null");
 
-            if (detectedAnchors.ContainsKey(id))
-            {
-                Pose detectedAnchorPose = Pose.identity;
+//            if (detectedAnchors.ContainsKey(id))
+//            {
+//                Pose detectedAnchorPose = Pose.identity;
 
-                //Android and iOS require coordinate from stored Anchor
-#if UNITY_ANDROID || UNITY_IOS
-                detectedAnchorPose = detectedAnchors[id].GetPose();
-#endif
+//                //Android and iOS require coordinate from stored Anchor
+//#if UNITY_ANDROID || UNITY_IOS
+//                detectedAnchorPose = detectedAnchors[id].GetPose();
+//#endif
 
-                var anchoredObject = GameObject.Instantiate(objectToAnchorPrefab, detectedAnchorPose.position, detectedAnchorPose.rotation);
+//                var anchoredObject = GameObject.Instantiate(objectToAnchorPrefab, detectedAnchorPose.position, detectedAnchorPose.rotation);
 
-                CloudNativeAnchor attachedAnchor = GetClouddNativeAnchor(anchoredObject);
+//                CloudNativeAnchor attachedAnchor = GetClouddNativeAnchor(anchoredObject);
 
-                attachedAnchor.CloudToNative(detectedAnchors[id]);
-                OnCloudAnchorUpdated($"{anchoredObject.name}-{id}", anchoredObject);
-                return true;
-            }
+//                attachedAnchor.CloudToNative(detectedAnchors[id]);
+//                OnCloudAnchorUpdated($"{anchoredObject.name}-{id}", anchoredObject);
+//                return true;
+//            }
 
-            return false;
-        }
+//            return false;
+//        }
 
         /// <inheritdoc />
         public bool HasCloudAnchor(GameObject anchoredObject)
@@ -279,7 +281,7 @@ namespace XRTK.Providers.SpatialPersistence
         }
 
         /// <inheritdoc />
-        public bool MoveAnchoredObject(GameObject anchoredObject, Vector3 position, Quaternion rotation, string cloudAnchorID = "")
+        public bool TryMoveSpatialPersistence(GameObject anchoredObject, Vector3 position, Quaternion rotation, Guid cloudAnchorID = new Guid())
         {
             Debug.Assert(anchoredObject != null, "Anchored Object is null");
 
@@ -292,7 +294,7 @@ namespace XRTK.Providers.SpatialPersistence
             }
 
             //If the ASA Provider is not running, expose an error.
-            if (!string.IsNullOrEmpty(cloudAnchorID) && (cloudManager == null || !cloudManager.IsSessionStarted))
+            if (cloudAnchorID != Guid.Empty && (cloudManager == null || !cloudManager.IsSessionStarted))
             {
                 OnSpatialPersistenceError("Unable to create Anchor as the Spatial Persistence provider is not running, is it configuired correctly?");
                 return false;
@@ -300,7 +302,7 @@ namespace XRTK.Providers.SpatialPersistence
 
             // if a Cloud identifier is provided and the corresponding ID has been found, move object to anchored point.
             // Else force move the anchor which breaks any preexisting cloud anchor reference.
-            if (!string.IsNullOrEmpty(cloudAnchorID) && detectedAnchors.ContainsKey(cloudAnchorID))
+            if (cloudAnchorID != Guid.Empty && detectedAnchors.ContainsKey(cloudAnchorID))
             {
                 attachedAnchor.CloudToNative(detectedAnchors[cloudAnchorID]);
             }
@@ -309,18 +311,12 @@ namespace XRTK.Providers.SpatialPersistence
                 attachedAnchor.SetPose(position, rotation);
             }
 
-            OnCloudAnchorUpdated($"{anchoredObject.name}-{cloudAnchorID}", anchoredObject);
+            OnAnchorUpdated(cloudAnchorID, anchoredObject);
             return true;
         }
 
         /// <inheritdoc />
-        public void DeleteAnchor(string id)
-        {
-            DeleteAnchors(new string[] { id });
-        }
-
-        /// <inheritdoc />
-        public async void DeleteAnchors(string[] ids)
+        public async void DeleteAnchors(params Guid[] ids)
         {
             Debug.Assert(ids != null, "ID array is null");
             Debug.Assert(ids.Length < 1, "No Ids found to delete");
@@ -340,9 +336,9 @@ namespace XRTK.Providers.SpatialPersistence
         }
 
         /// <inheritdoc />
-        public bool TryClearAnchors()
+        public bool TryClearAnchorCache()
         {
-            detectedAnchors = new Dictionary<string, CloudSpatialAnchor>();
+            detectedAnchors = new Dictionary<Guid, CloudSpatialAnchor>();
 
             if (detectedAnchors?.Count == 0)
             {
@@ -371,28 +367,28 @@ namespace XRTK.Providers.SpatialPersistence
         public void OnSessionEnded() => SessionEnded?.Invoke();
 
         /// <inheritdoc />
-        public event Action CreateAnchoredObjectStarted;
-        public void OnCreateAnchoredObjectStarted() => CreateAnchoredObjectStarted?.Invoke();
+        public event Action CreateAnchorStarted;
+        public void OnCreateAnchoredObjectStarted() => CreateAnchorStarted?.Invoke();
 
         /// <inheritdoc />
-        public event Action AnchorLocated;
-        public void OnAnchorLocated() => AnchorLocated?.Invoke();
+        public event Action FindAnchorStarted;
+        public void OnFindAnchorStarted() => FindAnchorStarted?.Invoke();
 
         /// <inheritdoc />
-        public event Action<string> AnchorDeleted;
-        public void OnAnchorDeleted(string id) => AnchorDeleted?.Invoke(id);
+        public event Action<Guid> AnchorDeleted;
+        public void OnAnchorDeleted(Guid id) => AnchorDeleted?.Invoke(id);
 
         #endregion Internal Events
 
         #region Service Events
 
         /// <inheritdoc />
-        public event Action CreateAnchoredObjectFailed;
-        public void OnCreateAnchoredObjectFailed() => CreateAnchoredObjectFailed?.Invoke();
+        public event Action CreateAnchorFailed;
+        public void OnCreateAnchoredObjectFailed() => CreateAnchorFailed?.Invoke();
 
         /// <inheritdoc />
-        public event Action<string, GameObject> CreateAnchoredObjectSucceeded;
-        public void OnCreateAnchoredObjectSucceeded(string id, GameObject anchoredObject) => CreateAnchoredObjectSucceeded?.Invoke(id, anchoredObject);
+        public event Action<Guid, GameObject> CreateAnchorSucceeded;
+        public void OnCreateAnchorSucceeded(Guid id, GameObject anchoredObject) => CreateAnchorSucceeded?.Invoke(id, anchoredObject);
 
         /// <inheritdoc />
         public event Action<string> SpatialPersistenceStatusMessage;
@@ -403,12 +399,12 @@ namespace XRTK.Providers.SpatialPersistence
         public void OnSpatialPersistenceError(string exception) => SpatialPersistenceError?.Invoke(exception);
 
         /// <inheritdoc />
-        public event Action<string, GameObject> CloudAnchorUpdated;
-        public void OnCloudAnchorUpdated(string id, GameObject gameObject) => CloudAnchorUpdated?.Invoke(id, gameObject);
+        public event Action<Guid, GameObject> AnchorUpdated;
+        public void OnAnchorUpdated(Guid id, GameObject gameObject) => AnchorUpdated?.Invoke(id, gameObject);
 
         /// <inheritdoc />
-        public event Action<string> CloudAnchorLocated;
-        public void OnCloudAnchorLocated(string id) => CloudAnchorLocated?.Invoke(id);
+        public event Action<Guid, GameObject> AnchorLocated;
+        public void OnAnchorLocated(Guid id, GameObject anchoredGameObject) => AnchorLocated?.Invoke(id, anchoredGameObject);
 
         #endregion Service Events
 
@@ -433,5 +429,18 @@ namespace XRTK.Providers.SpatialPersistence
         }
 
         #endregion
+    }
+
+    public static class ArrayExtensions
+    {
+        public static string[] ToStringArray(this Guid[] input)
+        {
+            var newArray = new string[input.Length];
+            for (var i = 0; i < input.Length; i++)
+            {
+                newArray[i] = input[i].ToString();
+            }
+            return newArray;
+        }
     }
 }
