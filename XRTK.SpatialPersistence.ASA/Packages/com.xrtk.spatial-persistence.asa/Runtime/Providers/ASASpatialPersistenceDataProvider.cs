@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
+using XRTK.Definitions;
 using XRTK.Definitions.SpatialPersistence;
 using XRTK.Definitions.Utilities;
 using XRTK.Interfaces.SpatialPersistence;
@@ -57,11 +58,6 @@ namespace XRTK.Providers.SpatialPersistence
                 OnSpatialPersistenceError(message);
             }
 
-            // Register for Azure Spatial Anchor events
-            cloudManager.AnchorLocated += CloudManager_AnchorLocated;
-
-            anchorLocateCriteria = new AnchorLocateCriteria();
-
             spatialPersistenceSystem.RegisterSpatialPersistenceDataProvider(this);
 
             OnSessionInitialised();
@@ -102,6 +98,11 @@ namespace XRTK.Providers.SpatialPersistence
 
             if (cloudManager.IsSessionStarted)
             {
+                anchorLocateCriteria = new AnchorLocateCriteria();
+
+                // Register for Azure Spatial Anchor events
+                cloudManager.AnchorLocated += CloudManager_AnchorLocated;
+
                 OnSessionStarted();
             }
             else
@@ -134,7 +135,6 @@ namespace XRTK.Providers.SpatialPersistence
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private void CloudManager_AnchorLocated(object sender, AnchorLocatedEventArgs args)
-        private void CloudManager_AnchorLocated(object sender, AnchorLocatedEventArgs args)
         {
             if (Guid.TryParse(args.Identifier, out var anchorGuid))
             {
@@ -147,7 +147,7 @@ namespace XRTK.Providers.SpatialPersistence
 
                 //Android and iOS require coordinate from stored Anchor
 #if UNITY_ANDROID || UNITY_IOS
-                detectedAnchorPose = detectedAnchors[id].GetPose();
+                detectedAnchorPose = detectedAnchors[anchorGuid].GetPose();
 #endif
 
                 var anchoredObject = new GameObject($"Anchor - [{anchorGuid}]");
@@ -156,9 +156,8 @@ namespace XRTK.Providers.SpatialPersistence
                 CloudNativeAnchor attachedAnchor = GetClouddNativeAnchor(anchoredObject);
 
                 attachedAnchor.CloudToNative(detectedAnchors[anchorGuid]);
-                OnCloudAnchorUpdated(anchorGuid, anchoredObject);
 
-                OnCloudAnchorLocated(anchorGuid);
+                OnAnchorLocated(anchorGuid, anchoredObject);
             }
             else
             {
@@ -208,13 +207,11 @@ namespace XRTK.Providers.SpatialPersistence
                 // Actually save
                 await cloudManager.CreateAnchorAsync(cloudAnchor);
 
-                // Success?
-                //bool success = ;
                 if (cloudAnchor != null && Guid.TryParse(cloudAnchor.Identifier, out var cloudAnchorGuid))
                 {
                     detectedAnchors.Add(cloudAnchorGuid, cloudAnchor);
-                    OnCreateAnchorSucceeded(cloudAnchorGuid, anchoredObject);
                     anchoredObject.name = $"Anchor - [{cloudAnchor.Identifier}]";
+                    OnCreateAnchorSucceeded(cloudAnchorGuid, anchoredObject);
                 }
                 else
                 {
@@ -340,7 +337,7 @@ namespace XRTK.Providers.SpatialPersistence
 
         #region Events
 
-        #region Internal Events
+        #region Provider Events
 
         /// <inheritdoc />
         public event Action SessionInitialised;
@@ -366,7 +363,7 @@ namespace XRTK.Providers.SpatialPersistence
         public event Action<Guid> AnchorDeleted;
         public void OnAnchorDeleted(Guid id) => AnchorDeleted?.Invoke(id);
 
-        #endregion Internal Events
+        #endregion Provider Events
 
         #region Service Events
 
