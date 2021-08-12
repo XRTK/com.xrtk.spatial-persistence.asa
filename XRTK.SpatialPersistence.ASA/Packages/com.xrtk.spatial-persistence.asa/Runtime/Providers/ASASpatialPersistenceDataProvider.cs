@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
-using XRTK.Definitions;
 using XRTK.Definitions.SpatialPersistence;
 using XRTK.Definitions.Utilities;
 using XRTK.Interfaces.SpatialPersistence;
@@ -87,7 +86,23 @@ namespace XRTK.Providers.SpatialPersistence
         #region IMixedRealitySpatialPersistenceDataProvider Implementation
 
         /// <inheritdoc />
-        public async void StartSpatialPersistenceProvider()
+        public void StartSpatialPersistenceProvider()
+        {
+#if UNITY_WSA
+        StartASASession();
+#else
+            if (ARSession.state == ARSessionState.SessionTracking)
+            {
+                StartASASession();
+            }
+            else
+            {
+                ARSession.stateChanged += ARSession_stateChanged;
+            }
+#endif
+        }
+
+        private async void StartASASession()
         {
             if (cloudManager.Session == null)
             {
@@ -109,11 +124,22 @@ namespace XRTK.Providers.SpatialPersistence
             {
                 OnSpatialPersistenceError("Unable to start the Spatial Persistence provider, is it configuired correctly?");
             }
+
+        }
+
+        private void ARSession_stateChanged(ARSessionStateChangedEventArgs obj)
+        {
+            if (obj.state == ARSessionState.SessionTracking && !IsRunning)
+            {
+                StartASASession();
+            }
         }
 
         /// <inheritdoc />
         public async void StopSpatialPersistenceProvider()
         {
+            if (cloudManager == null) { return; }
+
             if (currentWatcher != null)
             {
                 currentWatcher.Stop();
@@ -198,7 +224,7 @@ namespace XRTK.Providers.SpatialPersistence
             {
                 await Task.Delay(330);
                 float createProgress = cloudManager.SessionStatus.RecommendedForCreateProgress;
-                var message = $"Move your device to capture more environment data: {createProgress:0%}";
+                var message = $"{createProgress:0%}";
                 OnSpatialPersistenceStatusMessage(message);
             }
 
@@ -215,7 +241,7 @@ namespace XRTK.Providers.SpatialPersistence
                 }
                 else
                 {
-                    OnCreateAnchoredObjectFailed();
+                    OnCreateAnchorFailed();
                 }
                 cloudAnchor = null;
             }
@@ -369,7 +395,7 @@ namespace XRTK.Providers.SpatialPersistence
 
         /// <inheritdoc />
         public event Action CreateAnchorFailed;
-        public void OnCreateAnchoredObjectFailed() => CreateAnchorFailed?.Invoke();
+        public void OnCreateAnchorFailed() => CreateAnchorFailed?.Invoke();
 
         /// <inheritdoc />
         public event Action<Guid, GameObject> CreateAnchorSucceeded;
