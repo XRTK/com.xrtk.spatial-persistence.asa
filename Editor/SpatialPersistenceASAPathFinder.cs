@@ -9,10 +9,10 @@ namespace XRTK.SpatialPersistence.ASA.Editor
     /// <summary>
     /// Dummy scriptable object used to find the relative path of the com.xrtk.spatial-persistence.asa.
     /// </summary>
-    ///// <inheritdoc cref="IPathFinder" />
+    /// <inheritdoc cref="IPathFinder" />
     public class SpatialPersistenceASAPathFinder : ScriptableObject, IPathFinder
     {
-        ///// <inheritdoc />
+        /// <inheritdoc />
         public string Location => $"/Editor/{nameof(SpatialPersistenceASAPathFinder)}.cs";
     }
 }
