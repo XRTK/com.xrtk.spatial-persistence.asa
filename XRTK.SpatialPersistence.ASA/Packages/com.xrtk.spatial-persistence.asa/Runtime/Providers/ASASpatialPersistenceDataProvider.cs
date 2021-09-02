@@ -8,7 +8,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
+using XRTK.Attributes;
 using XRTK.Definitions;
+using XRTK.Definitions.Platforms;
 using XRTK.Definitions.SpatialPersistence;
 using XRTK.Extensions;
 using XRTK.Interfaces.SpatialPersistence;
@@ -18,6 +20,8 @@ using Object = UnityEngine.Object;
 
 namespace XRTK.Providers.SpatialPersistence
 {
+    [RuntimePlatform(typeof(AndroidPlatform))]
+    [RuntimePlatform(typeof(UniversalWindowsPlatform))]
     [System.Runtime.InteropServices.Guid("02963BCE-8519-4923-AE59-833953F6F13C")]
     public class ASASpatialPersistenceDataProvider : BaseDataProvider, IMixedRealitySpatialPersistenceDataProvider
     {
@@ -253,7 +257,7 @@ namespace XRTK.Providers.SpatialPersistence
             // In this sample app we delete the cloud anchor explicitly, but here we show how to set an anchor to expire automatically
             cloudAnchor.Expiration = timeToLive;
 
-             while (!cloudManager.IsReadyForCreate)
+            while (!cloudManager.IsReadyForCreate)
             {
                 await Awaiters.UnityMainThread;
                 SpatialPersistenceStatusMessage?.Invoke($"{cloudManager.SessionStatus.RecommendedForCreateProgress}");

@@ -7,6 +7,7 @@
 [Bb]uilds/
 [Bb]uild/
 [Ll]ibrary/
+[Ll]ogs/
 [Aa]pp/
 [Aa]pp.meta
 UserSettings/
@@ -79,5 +80,5 @@ ThirdParty.meta
 # ====================== #
 # Project Assets         #
 # ====================== #
-[Aa]zureSpatialAnchors.SDK/
-[Ss]patialAnchorConfig.asset
+AzureSpatialAnchors.SDK/
+SpatialAnchorConfig.asset
