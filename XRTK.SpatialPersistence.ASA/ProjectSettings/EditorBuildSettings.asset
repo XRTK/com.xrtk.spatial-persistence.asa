@@ -9,9 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/AnchorsTest.unity
     guid: 3f9aec5443cb78249a3a674593b254f2
   m_configObjects:
-    UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: a3bd7b3b10a90b1428fc8bf11444c5a4,
+    UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: 2892637605c43584799260fef295f201,
       type: 2}
-    UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: 9a59dea27664c1348b07a6396dd24353,
+    UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: 56d11050dd981c946912000a46eb6d1c,
       type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 2c23f375c4c582844a0577d36c898087,
       type: 2}
