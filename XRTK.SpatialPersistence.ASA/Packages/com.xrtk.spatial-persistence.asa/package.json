@@ -20,7 +20,7 @@
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
     "com.xrtk.core": "0.3.0-preview.15",
-    "com.xrtk.spatial-persistence": "0.3.0-preview.6",
+    "com.xrtk.spatial-persistence": "0.3.0-preview.8",
     "com.unity.xr.arfoundation": "4.1.7"
   },
   "profiles": [

@@ -81,4 +81,5 @@ ThirdParty.meta
 # Project Assets         #
 # ====================== #
 AzureSpatialAnchors.SDK/
+AzureSpatialAnchors.SDK.meta
 SpatialAnchorConfig.asset
