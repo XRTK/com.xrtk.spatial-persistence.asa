@@ -100,7 +100,7 @@ namespace XRTK.Providers.SpatialPersistence
         public void StartSpatialPersistenceProvider()
         {
 #if UNITY_WSA
-            StartASASession();
+            StartSession();
 #else
             if (ARSession.state == ARSessionState.SessionTracking)
             {

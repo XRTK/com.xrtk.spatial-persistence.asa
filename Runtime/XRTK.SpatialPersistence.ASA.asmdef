@@ -4,10 +4,11 @@
     "references": [
         "GUID:f3241d040533491e8a1e2714b27c3111",
         "GUID:c148ca4f0506aba4bb7c9e15a44bf2e3",
-        "GUID:33d8827e6b886c24980a9ae3153d16c9",
         "GUID:a9420e37d7990b54abdef6688edbe313",
+        "GUID:33d8827e6b886c24980a9ae3153d16c9",
         "GUID:cea456fb85d819645899d08b84466140",
-        "GUID:d4aaefa3e06ea4bad82d59bf7ee4969f"
+        "GUID:d4aaefa3e06ea4bad82d59bf7ee4969f",
+        "GUID:9a6ddf5d388cc2b498e8a9d44bd289f0"
     ],
     "includePlatforms": [
         "Android",
