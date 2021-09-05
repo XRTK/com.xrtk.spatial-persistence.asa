@@ -23,7 +23,7 @@
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
     "com.xrtk.spatial-persistence": "0.3.0-preview.9",
-    "com.unity.xr.windowsmr": "4.5.0",
+    "com.xrtk.wmr": "0.3.0-preview.2",
     "com.microsoft.azure.spatial-anchors-sdk.core": "2.10.2"
   },
   "profiles": [
