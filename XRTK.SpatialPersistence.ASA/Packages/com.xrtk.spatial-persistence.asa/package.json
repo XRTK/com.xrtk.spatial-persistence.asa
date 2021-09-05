@@ -8,7 +8,10 @@
     "ar",
     "xr",
     "mixed",
-    "reality"
+    "reality",
+    "azure",
+    "spatial",
+    "anchors"
   ],
   "version": "0.3.0",
   "unity": "2020.3",
@@ -19,9 +22,9 @@
   },
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
-    "com.xrtk.core": "0.3.0-preview.15",
-    "com.xrtk.spatial-persistence": "0.3.0-preview.8",
-    "com.unity.xr.arfoundation": "4.1.7"
+    "com.xrtk.spatial-persistence": "0.3.0-preview.9",
+    "com.xrtk.wmr": "0.3.0-preview.2",
+    "com.microsoft.azure.spatial-anchors-sdk.core": "2.10.2"
   },
   "profiles": [
     {
