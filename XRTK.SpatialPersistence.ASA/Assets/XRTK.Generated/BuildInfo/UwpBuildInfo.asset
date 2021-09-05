@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: UwpBuildInfo
   m_EditorClassIdentifier: 
   autoIncrement: 0
-  bundleIdentifier: com.xrtk.spatial-persistence.asa
+  bundleIdentifier: com.xrtk.asa
   install: 0
   buildAppx: 1
-  rebuildAppx: 1
+  rebuildAppx: 0
   platformArchitecture: 3
   verbosity: 0

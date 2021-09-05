@@ -154,10 +154,10 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.xrtk.spatialpersistence
-    Lumin: com.xrtk.spatial-persistence.asa
-    Standalone: com.xrtk.spatial-persistence.asa
-    Windows Store Apps: com.xrtk.spatial-persistence.asa
+    Android: com.xrtk.asa
+    Lumin: com.xrtk.asa
+    Standalone: com.xrtk.asa
+    Windows Store Apps: com.xrtk.asa
     iPhone: com.xrtk.ProductName
   buildNumber:
     Standalone: 0
@@ -717,7 +717,7 @@ PlayerSettings:
   apiCompatibilityLevelPerPlatform: {}
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: com.xrtk.spatial-persistence.asa
+  metroPackageName: com.xrtk.asa
   metroPackageVersion: 0.3.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
