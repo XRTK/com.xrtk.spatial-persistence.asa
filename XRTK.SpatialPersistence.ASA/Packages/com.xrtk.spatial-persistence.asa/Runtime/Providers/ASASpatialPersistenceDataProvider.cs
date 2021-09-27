@@ -178,30 +178,42 @@ namespace XRTK.Providers.SpatialPersistence
         /// <param name="args"></param>
         private void CloudManager_AnchorLocated(object sender, AnchorLocatedEventArgs args)
         {
-            if (Guid.TryParse(args.Identifier, out var anchorGuid))
+            try
             {
-                if (!detectedAnchors.ContainsKey(anchorGuid))
+                if (Guid.TryParse(args.Identifier, out var anchorGuid))
                 {
-                    detectedAnchors.Add(anchorGuid, args.Anchor);
-                }
+                    // If an anchor is found but has no Anchor data, create a new CloudSpatialAnchor
+                    CloudSpatialAnchor anchor = args.Anchor == null ? new CloudSpatialAnchor() : args.Anchor;
+                    if (!detectedAnchors.ContainsKey(anchorGuid))
+                    {
+                        detectedAnchors.Add(anchorGuid, anchor);
+                    }
 
-                //Android and iOS require coordinate from stored Anchor
+                    // Android and iOS require coordinate from stored Anchor
 #if UNITY_ANDROID || UNITY_IOS
-                var detectedAnchorPose = detectedAnchors[anchorGuid].GetPose();
+                    var detectedAnchorPose = detectedAnchors[anchorGuid].GetPose();
 #else
-                var detectedAnchorPose = Pose.identity;
+                    var detectedAnchorPose = Pose.identity;
 #endif
-                var anchoredObject = new GameObject($"Anchor - [{anchorGuid}]");
-                anchoredObject.transform.SetPositionAndRotation(detectedAnchorPose.position, detectedAnchorPose.rotation);
 
-                var attachedAnchor = anchoredObject.EnsureComponent<CloudNativeAnchor>();
-                attachedAnchor.CloudToNative(detectedAnchors[anchorGuid]);
+                    var anchoredObject = new GameObject($"Anchor - [{anchorGuid}]");
+                    anchoredObject.transform.SetPositionAndRotation(detectedAnchorPose.position, detectedAnchorPose.rotation);
 
-                AnchorLocated?.Invoke(anchorGuid, anchoredObject);
+                    var attachedAnchor = anchoredObject.EnsureComponent<CloudNativeAnchor>();
+                    attachedAnchor.CloudToNative(detectedAnchors[anchorGuid]);
+
+                    AnchorLocated?.Invoke(anchorGuid, anchoredObject);
+                }
+                else
+                {
+                    var errorMessage = $"Anchor returned from service but Identifier was invalid [{args.Identifier}]";
+                    Debug.LogError(errorMessage);
+                    SpatialPersistenceError?.Invoke(errorMessage);
+                }
             }
-            else
+            catch
             {
-                var errorMessage = $"Anchor returned from service but Identifier was invalid [{args.Identifier}]";
+                var errorMessage = $"An Error Occured retrieving the Anchor, Anchor ignored";
                 Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
             }
