@@ -61,7 +61,6 @@ namespace XRTK.Providers.SpatialPersistence
             if (cloudManager == null)
             {
                 var message = $"Unable to locate either the {typeof(SpatialAnchorManager)} or {typeof(ARSession)} in the scene, service cannot initialize";
-                Debug.LogError(message);
                 SpatialPersistenceError?.Invoke(message);
             }
 
@@ -136,7 +135,6 @@ namespace XRTK.Providers.SpatialPersistence
             else
             {
                 const string errorMessage = "Unable to start the Spatial Persistence provider, is it configured correctly?";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
             }
         }
@@ -206,7 +204,6 @@ namespace XRTK.Providers.SpatialPersistence
                 else
                 {
                     var errorMessage = $"Anchor returned from service but Identifier was invalid [{args.Identifier}]";
-                    Debug.LogError(errorMessage);
                     SpatialPersistenceError?.Invoke(errorMessage);
                 }
             }
@@ -215,13 +212,11 @@ namespace XRTK.Providers.SpatialPersistence
                 if (Guid.TryParse(args.Identifier, out var anchorGuid))
                 {
                     var errorMessage = $"An anchor [{anchorGuid}] was returned with invalid data\nError reported as {ex}";
-                    Debug.LogError(errorMessage);
                     AnchorLocatedError?.Invoke(anchorGuid, errorMessage);
                 }
                 else
                 {
                     var errorMessage = $"An Error Occurred retrieving the Anchor, Anchor ignored\n{ex}";
-                    Debug.LogError(errorMessage);
                     SpatialPersistenceError?.Invoke(errorMessage);
                 }
             }
@@ -241,7 +236,6 @@ namespace XRTK.Providers.SpatialPersistence
             catch (Exception)
             {
                 const string errorMessage = "Unable to create Anchor as the Spatial Persistence provider is not running, is it configured correctly?";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
                 return Guid.Empty;
             }
@@ -253,7 +247,6 @@ namespace XRTK.Providers.SpatialPersistence
             catch (Exception)
             {
                 const string errorMessage = "The cloud session hasn't been started!";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
                 return Guid.Empty;
             }
@@ -300,7 +293,6 @@ namespace XRTK.Providers.SpatialPersistence
             catch (Exception e)
             {
                 SpatialPersistenceError?.Invoke($"{e}");
-                Debug.LogError(e);
             }
 
             Debug.LogError("Failed to create anchor!");
@@ -325,7 +317,6 @@ namespace XRTK.Providers.SpatialPersistence
             catch (Exception)
             {
                 const string errorMessage = "Unable to create Anchor as the Spatial Persistence provider is not running, is it configured correctly?";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
                 return false;
             }
@@ -337,7 +328,6 @@ namespace XRTK.Providers.SpatialPersistence
             catch (Exception)
             {
                 const string errorMessage = "The cloud session hasn't been started!";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
                 return false;
             }
@@ -349,7 +339,6 @@ namespace XRTK.Providers.SpatialPersistence
             catch (Exception)
             {
                 const string errorMessage = "No Anchor criteria was found!";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
                 return false;
             }
@@ -414,7 +403,6 @@ namespace XRTK.Providers.SpatialPersistence
             if (cloudAnchorID != Guid.Empty && (cloudManager == null || !cloudManager.IsSessionStarted))
             {
                 const string errorMessage = "Unable to create Anchor as the Spatial Persistence provider is not running, is it configured correctly?";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
                 return false;
             }
