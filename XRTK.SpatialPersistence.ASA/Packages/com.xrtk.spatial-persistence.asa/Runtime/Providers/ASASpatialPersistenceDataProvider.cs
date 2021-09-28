@@ -213,9 +213,18 @@ namespace XRTK.Providers.SpatialPersistence
             }
             catch
             {
-                var errorMessage = $"An Error Occured retrieving the Anchor, Anchor ignored";
-                Debug.LogError(errorMessage);
-                SpatialPersistenceError?.Invoke(errorMessage);
+                if (Guid.TryParse(args.Identifier, out var anchorGuid))
+                {
+                    var errorMessage = $"An anchor [{anchorGuid}] was returned with invalid data";
+                    Debug.LogError(errorMessage);
+                    AnchorLocatedError?.Invoke(anchorGuid, errorMessage);
+                }
+                else
+                {
+                    var errorMessage = $"An Error Occured retrieving the Anchor, Anchor ignored";
+                    Debug.LogError(errorMessage);
+                    SpatialPersistenceError?.Invoke(errorMessage);
+                }
             }
         }
 
@@ -496,6 +505,9 @@ namespace XRTK.Providers.SpatialPersistence
 
         /// <inheritdoc />
         public event Action<Guid, GameObject> AnchorLocated;
+
+        /// <inheritdoc />
+        public event Action<Guid, string> AnchorLocatedError;
 
         #endregion Service Events
 
