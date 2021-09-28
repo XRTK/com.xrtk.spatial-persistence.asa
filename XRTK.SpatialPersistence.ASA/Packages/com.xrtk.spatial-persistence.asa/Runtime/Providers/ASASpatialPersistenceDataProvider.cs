@@ -183,10 +183,9 @@ namespace XRTK.Providers.SpatialPersistence
                 if (Guid.TryParse(args.Identifier, out var anchorGuid))
                 {
                     // If an anchor is found but has no Anchor data, create a new CloudSpatialAnchor
-                    CloudSpatialAnchor anchor = args.Anchor == null ? new CloudSpatialAnchor() : args.Anchor;
                     if (!detectedAnchors.ContainsKey(anchorGuid))
                     {
-                        detectedAnchors.Add(anchorGuid, anchor);
+                        detectedAnchors.Add(anchorGuid, args.Anchor);
                     }
 
                     // Android and iOS require coordinate from stored Anchor
