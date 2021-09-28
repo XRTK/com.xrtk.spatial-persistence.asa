@@ -210,17 +210,17 @@ namespace XRTK.Providers.SpatialPersistence
                     SpatialPersistenceError?.Invoke(errorMessage);
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 if (Guid.TryParse(args.Identifier, out var anchorGuid))
                 {
-                    var errorMessage = $"An anchor [{anchorGuid}] was returned with invalid data";
+                    var errorMessage = $"An anchor [{anchorGuid}] was returned with invalid data\nError reported as {ex}";
                     Debug.LogError(errorMessage);
                     AnchorLocatedError?.Invoke(anchorGuid, errorMessage);
                 }
                 else
                 {
-                    var errorMessage = $"An Error Occured retrieving the Anchor, Anchor ignored";
+                    var errorMessage = $"An Error Occured retrieving the Anchor, Anchor ignored\n{ex}";
                     Debug.LogError(errorMessage);
                     SpatialPersistenceError?.Invoke(errorMessage);
                 }
