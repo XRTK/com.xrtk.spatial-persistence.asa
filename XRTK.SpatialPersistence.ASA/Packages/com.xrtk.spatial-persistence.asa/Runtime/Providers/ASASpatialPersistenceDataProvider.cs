@@ -220,7 +220,7 @@ namespace XRTK.Providers.SpatialPersistence
                 }
                 else
                 {
-                    var errorMessage = $"An Error Occured retrieving the Anchor, Anchor ignored\n{ex}";
+                    var errorMessage = $"An Error Occurred retrieving the Anchor, Anchor ignored\n{ex}";
                     Debug.LogError(errorMessage);
                     SpatialPersistenceError?.Invoke(errorMessage);
                 }
