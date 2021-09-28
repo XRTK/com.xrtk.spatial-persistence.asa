@@ -61,7 +61,6 @@ namespace XRTK.Providers.SpatialPersistence
             if (cloudManager == null)
             {
                 var message = $"Unable to locate either the {typeof(SpatialAnchorManager)} or {typeof(ARSession)} in the scene, service cannot initialize";
-                Debug.LogError(message);
                 SpatialPersistenceError?.Invoke(message);
             }
 
@@ -136,7 +135,6 @@ namespace XRTK.Providers.SpatialPersistence
             else
             {
                 const string errorMessage = "Unable to start the Spatial Persistence provider, is it configured correctly?";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
             }
         }
@@ -178,32 +176,49 @@ namespace XRTK.Providers.SpatialPersistence
         /// <param name="args"></param>
         private void CloudManager_AnchorLocated(object sender, AnchorLocatedEventArgs args)
         {
-            if (Guid.TryParse(args.Identifier, out var anchorGuid))
+            try
             {
-                if (!detectedAnchors.ContainsKey(anchorGuid))
+                if (Guid.TryParse(args.Identifier, out var anchorGuid))
                 {
-                    detectedAnchors.Add(anchorGuid, args.Anchor);
-                }
+                    // If an anchor is found but has no Anchor data, create a new CloudSpatialAnchor
+                    if (!detectedAnchors.ContainsKey(anchorGuid))
+                    {
+                        detectedAnchors.Add(anchorGuid, args.Anchor);
+                    }
 
-                //Android and iOS require coordinate from stored Anchor
+                    // Android and iOS require coordinate from stored Anchor
 #if UNITY_ANDROID || UNITY_IOS
-                var detectedAnchorPose = detectedAnchors[anchorGuid].GetPose();
+                    var detectedAnchorPose = detectedAnchors[anchorGuid].GetPose();
 #else
-                var detectedAnchorPose = Pose.identity;
+                    var detectedAnchorPose = Pose.identity;
 #endif
-                var anchoredObject = new GameObject($"Anchor - [{anchorGuid}]");
-                anchoredObject.transform.SetPositionAndRotation(detectedAnchorPose.position, detectedAnchorPose.rotation);
 
-                var attachedAnchor = anchoredObject.EnsureComponent<CloudNativeAnchor>();
-                attachedAnchor.CloudToNative(detectedAnchors[anchorGuid]);
+                    var anchoredObject = new GameObject($"Anchor - [{anchorGuid}]");
+                    anchoredObject.transform.SetPositionAndRotation(detectedAnchorPose.position, detectedAnchorPose.rotation);
 
-                AnchorLocated?.Invoke(anchorGuid, anchoredObject);
+                    var attachedAnchor = anchoredObject.EnsureComponent<CloudNativeAnchor>();
+                    attachedAnchor.CloudToNative(detectedAnchors[anchorGuid]);
+
+                    AnchorLocated?.Invoke(anchorGuid, anchoredObject);
+                }
+                else
+                {
+                    var errorMessage = $"Anchor returned from service but Identifier was invalid [{args.Identifier}]";
+                    SpatialPersistenceError?.Invoke(errorMessage);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var errorMessage = $"Anchor returned from service but Identifier was invalid [{args.Identifier}]";
-                Debug.LogError(errorMessage);
-                SpatialPersistenceError?.Invoke(errorMessage);
+                if (Guid.TryParse(args.Identifier, out var anchorGuid))
+                {
+                    var errorMessage = $"An anchor [{anchorGuid}] was returned with invalid data\nError reported as {ex}";
+                    AnchorLocatedError?.Invoke(anchorGuid, errorMessage);
+                }
+                else
+                {
+                    var errorMessage = $"An Error Occurred retrieving the Anchor, Anchor ignored\n{ex}";
+                    SpatialPersistenceError?.Invoke(errorMessage);
+                }
             }
         }
 
@@ -221,7 +236,6 @@ namespace XRTK.Providers.SpatialPersistence
             catch (Exception)
             {
                 const string errorMessage = "Unable to create Anchor as the Spatial Persistence provider is not running, is it configured correctly?";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
                 return Guid.Empty;
             }
@@ -233,7 +247,6 @@ namespace XRTK.Providers.SpatialPersistence
             catch (Exception)
             {
                 const string errorMessage = "The cloud session hasn't been started!";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
                 return Guid.Empty;
             }
@@ -280,7 +293,6 @@ namespace XRTK.Providers.SpatialPersistence
             catch (Exception e)
             {
                 SpatialPersistenceError?.Invoke($"{e}");
-                Debug.LogError(e);
             }
 
             Debug.LogError("Failed to create anchor!");
@@ -305,7 +317,6 @@ namespace XRTK.Providers.SpatialPersistence
             catch (Exception)
             {
                 const string errorMessage = "Unable to create Anchor as the Spatial Persistence provider is not running, is it configured correctly?";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
                 return false;
             }
@@ -317,7 +328,6 @@ namespace XRTK.Providers.SpatialPersistence
             catch (Exception)
             {
                 const string errorMessage = "The cloud session hasn't been started!";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
                 return false;
             }
@@ -329,7 +339,6 @@ namespace XRTK.Providers.SpatialPersistence
             catch (Exception)
             {
                 const string errorMessage = "No Anchor criteria was found!";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
                 return false;
             }
@@ -394,7 +403,6 @@ namespace XRTK.Providers.SpatialPersistence
             if (cloudAnchorID != Guid.Empty && (cloudManager == null || !cloudManager.IsSessionStarted))
             {
                 const string errorMessage = "Unable to create Anchor as the Spatial Persistence provider is not running, is it configured correctly?";
-                Debug.LogError(errorMessage);
                 SpatialPersistenceError?.Invoke(errorMessage);
                 return false;
             }
@@ -484,6 +492,9 @@ namespace XRTK.Providers.SpatialPersistence
 
         /// <inheritdoc />
         public event Action<Guid, GameObject> AnchorLocated;
+
+        /// <inheritdoc />
+        public event Action<Guid, string> AnchorLocatedError;
 
         #endregion Service Events
 
