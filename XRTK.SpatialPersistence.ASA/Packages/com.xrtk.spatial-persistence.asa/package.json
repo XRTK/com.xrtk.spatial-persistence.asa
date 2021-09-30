@@ -18,11 +18,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/XRTK/SpatialPersistence.ASA.git"
+    "url": "git+https://github.com/XRTK/com.xrtk.spatial-persistence.asa.git"
   },
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
-    "com.xrtk.spatial-persistence": "0.3.0-preview.9",
+    "com.xrtk.spatial-persistence": "0.3.0-preview.11",
     "com.xrtk.wmr": "0.3.0-preview.2",
     "com.microsoft.azure.spatial-anchors-sdk.core": "2.10.2"
   },
