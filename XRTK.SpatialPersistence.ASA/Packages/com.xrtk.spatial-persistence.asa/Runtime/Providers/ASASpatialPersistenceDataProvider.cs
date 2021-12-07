@@ -308,7 +308,7 @@ namespace XRTK.Providers.SpatialPersistence
         public async Task<bool> TryFindAnchorPointsAsync(params Guid[] ids)
         {
             Debug.Assert(ids != null, "ID array is null");
-            Debug.Assert(ids.Length < 1, "No Ids found to locate");
+            Debug.Assert(ids.Length > 0, "No Ids found to locate");
 
             try
             {
@@ -426,7 +426,7 @@ namespace XRTK.Providers.SpatialPersistence
         public async void DeleteAnchors(params Guid[] ids)
         {
             Debug.Assert(ids != null, "ID array is null");
-            Debug.Assert(ids.Length < 1, "No Ids found to delete");
+            Debug.Assert(ids.Length > 0, "No Ids found to delete");
 
             if (ids.Length > 0)
             {
