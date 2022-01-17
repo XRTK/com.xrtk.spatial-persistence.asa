@@ -13,7 +13,7 @@
     "spatial",
     "anchors"
   ],
-  "version": "0.3.0",
+  "version": "0.3.0-preview.13",
   "unity": "2020.3",
   "license": "MIT",
   "repository": {
@@ -22,8 +22,8 @@
   },
   "author": "XRTK Team (https://github.com/XRTK)",
   "dependencies": {
-    "com.xrtk.spatial-persistence": "0.3.0-preview.11",
-    "com.xrtk.wmr": "0.3.0-preview.2",
+    "com.xrtk.spatial-persistence": "0.3.0-preview.12",
+    "com.xrtk.wmr": "0.3.0-preview.7",
     "com.microsoft.azure.spatial-anchors-sdk.core": "2.10.2"
   },
   "profiles": [
