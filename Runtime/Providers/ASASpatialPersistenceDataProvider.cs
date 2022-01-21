@@ -268,7 +268,10 @@ namespace XRTK.Providers.SpatialPersistence
             CloudSpatialAnchor cloudAnchor = cloudNativeAnchor.CloudAnchor;
 
             // In this sample app we delete the cloud anchor explicitly, but here we show how to set an anchor to expire automatically
-            cloudAnchor.Expiration = timeToLive;
+            if (DateTimeOffset.Compare(timeToLive, DateTime.Now) > 0)
+            {
+                cloudAnchor.Expiration = timeToLive;
+            }
 
             while (!cloudManager.IsReadyForCreate)
             {
